@@ -23,39 +23,38 @@ where
         initial_url.clone().host_str().unwrap(),
         initial_url,
         &mut summary,
-    )?;
+    );
     Ok(summary)
 }
 
-fn crawl_page<T>(host: T, url: Url, summary: &mut UrlSummary) -> Result<(), Box<dyn Error>>
+fn crawl_page<T>(host: T, url: Url, summary: &mut UrlSummary)
 where
     T: AsRef<str>,
 {
     // Download the html document
-    let body = get(url.clone())?.text()?;
+    if let Ok(body) = get(url.clone())
+        .and_then(|mut response| response.text()) {
 
-    // Parse the document with scraper
-    let html = Html::parse_document(&body);
+        // Parse the document with scraper
+        let html = Html::parse_document(&body);
 
-    // Get all the anchor tags
-    let anchor = Selector::parse("a").unwrap(); // Should be safe, we know a is ok
+        // Get all the anchor tags
+        let anchor = Selector::parse("a").unwrap(); // Should be safe, we know a is ok
 
-    for a in html.select(&anchor) {
-        if let Some(href) = a.value().attr("href") {
-            // Lets make sure the url is real.
-            // Note: join will resolve relative and absolute paths for us so we don't need to worry
-            if let Ok(next_url) = url.join(href) {
+        html.select(&anchor)
+            .into_iter()
+            .filter_map(|a| a.value().attr("href"))
+            .filter_map(|href| url.join(href).ok()) // Parse with join in case its a relative url
+            .for_each(|next_url| {
                 // Have we come across the url before, if we have we should crawl it
                 let new = summary.contains(&next_url);
                 // Lets add the url to make sure we don't create a loop
                 summary.add(&next_url);
                 if new && is_url_on_host(&next_url, host.as_ref()) {
-                    crawl_page(host.as_ref(), next_url, summary)?;
+                     crawl_page(host.as_ref(), next_url, summary);
                 }
-            }
-        }
+            });
     }
-    Ok(())
 }
 
 #[cfg(test)]
