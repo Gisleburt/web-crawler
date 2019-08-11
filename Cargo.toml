@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 structopt = "0.2.18"
+scraper = "0.10.1"
+reqwest = "0.9.19"

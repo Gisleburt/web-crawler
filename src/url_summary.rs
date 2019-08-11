@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 /// Our Urls are stored in a newtype structure to provide a simple API around a HashMap
+#[derive(Debug)]
 pub struct UrlSummary(HashMap<String, u64>);
 
 /// The default value for a UrlSummary should contain no entries. This method is used by
@@ -31,17 +32,25 @@ impl UrlSummary {
 
     /// Adds a url to the summary. If the url already exists it will increase the count.
     pub fn add<T>(&mut self, url: T)
-        where T: AsRef<str> {
+    where
+        T: AsRef<str>,
+    {
         let url = url.as_ref();
         match self.0.get_mut(url) {
-            Some(count) => { *count = *count + 1; },
-            None => { self.0.insert(url.to_string(), 1); },
+            Some(count) => {
+                *count = *count + 1;
+            }
+            None => {
+                self.0.insert(url.to_string(), 1);
+            }
         }
     }
 
     /// Returns the current count of a url in the page.
     pub fn get_count<T>(&mut self, url: T) -> u64
-        where T: AsRef<str> {
+    where
+        T: AsRef<str>,
+    {
         let url = url.as_ref();
         self.0.get(url).map(|count| count.to_owned()).unwrap_or(0)
     }

@@ -1,5 +1,5 @@
-use web_crawler::crawl;
 use structopt::StructOpt;
+use web_crawler::crawl;
 
 #[derive(Debug, StructOpt)]
 struct Opts {
@@ -9,5 +9,5 @@ struct Opts {
 
 fn main() {
     let opts = Opts::from_args();
-    crawl(&opts.url);
+    dbg!(crawl(&opts.url));
 }
