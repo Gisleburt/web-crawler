@@ -1,9 +1,8 @@
 mod url_summary;
 
 pub use crate::url_summary::UrlSummary;
-use reqwest::{get, Url};
+use reqwest::{get, Url, UrlError};
 use scraper::{Html, Selector};
-use std::error::Error;
 
 // Helper function for comparing domains.
 fn is_url_on_host<T>(url: &Url, host: T) -> bool
@@ -13,7 +12,7 @@ where
     !url.has_host() || url.host_str().unwrap() == host.as_ref()
 }
 
-pub fn crawl<T>(url: T) -> Result<UrlSummary, Box<dyn Error>>
+pub fn crawl<T>(url: T) -> Result<UrlSummary, UrlError>
 where
     T: AsRef<str>,
 {
@@ -32,8 +31,13 @@ where
     T: AsRef<str>,
 {
     // Download the html document
-    if let Ok(body) = get(url.clone())
-        .and_then(|mut response| response.text()) {
+    let result = get(url.clone())
+        .and_then(|mut response| response.text());
+    if let Err(e) = result {
+        dbg!(e);
+        return;
+    }
+    if let Ok(body) = result {
 
         // Parse the document with scraper
         let html = Html::parse_document(&body);

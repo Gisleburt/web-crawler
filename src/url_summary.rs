@@ -1,8 +1,9 @@
 use std::collections::hash_map::IntoIter;
 use std::collections::HashMap;
+use serde::Serialize;
 
 /// Our Urls are stored in a newtype structure to provide a simple API around a HashMap
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct UrlSummary(HashMap<String, u64>);
 
 /// The default value for a UrlSummary should contain no entries. This method is used by
