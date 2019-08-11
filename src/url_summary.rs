@@ -55,6 +55,13 @@ impl UrlSummary {
         let url = url.as_ref();
         self.0.get(url).map(|count| count.to_owned()).unwrap_or(0)
     }
+
+    pub fn contains<T>(&self, url: T) -> bool
+    where
+        T: AsRef<str>,
+    {
+        self.0.contains_key(url.as_ref())
+    }
 }
 
 /// We can return a struct to make the iterator nice and easy to use
@@ -72,6 +79,7 @@ impl Iterator for UrlSummaryIterator {
     type Item = UrlSummaryItem;
 
     fn next(&mut self) -> Option<Self::Item> {
+        // Map the tuple into a more ergonomic struct
         self.0.next().map(|v| Self::Item {
             url: v.0.to_owned(),
             count: v.1,
