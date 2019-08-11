@@ -9,5 +9,10 @@ struct Opts {
 
 fn main() {
     let opts = Opts::from_args();
-    dbg!(crawl(&opts.url));
+    match crawl(&opts.url) {
+        Ok(summary) => summary
+            .into_iter()
+            .for_each(|v| println!("{} - {}", v.url, v.count)),
+        Err(e) => eprintln!("Something went wrong\n{:#?}", e),
+    };
 }
