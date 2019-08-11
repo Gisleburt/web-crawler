@@ -1,5 +1,5 @@
-use web_crawler::test;
+use web_crawler::crawl;
 
 fn main() {
-    test();
+    crawl("");
 }
