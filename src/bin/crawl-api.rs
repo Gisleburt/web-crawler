@@ -1,9 +1,9 @@
-use actix_web::{web, App, HttpResponse, HttpServer, middleware, Error as ActixError};
-use web_crawler::crawl;
-use serde::Deserialize;
-use percent_encoding::percent_decode_str;
-use std::str::Utf8Error;
+use actix_web::{middleware, web, App, Error as ActixError, HttpResponse, HttpServer};
 use futures::Future;
+use percent_encoding::percent_decode_str;
+use serde::Deserialize;
+use std::str::Utf8Error;
+use web_crawler::crawl;
 
 #[derive(Deserialize)]
 struct CrawlInfo {
@@ -18,13 +18,15 @@ impl CrawlInfo {
     }
 }
 
-fn get_crawl_data(info: web::Path<CrawlInfo>) -> impl Future<Item = HttpResponse, Error = ActixError> {
+fn get_crawl_data(
+    info: web::Path<CrawlInfo>,
+) -> impl Future<Item = HttpResponse, Error = ActixError> {
     web::block(move || {
         crawl(info.get_domain().map_err(|_e| "Could not parse domain")?)
             .map_err(|_e| "Could not parse domain")
     })
-        .from_err()
-        .map(|summary| HttpResponse::Ok().json(summary))
+    .from_err()
+    .map(|summary| HttpResponse::Ok().json(summary))
 }
 
 fn main() {
@@ -33,10 +35,9 @@ fn main() {
             .wrap(middleware::Logger::default())
             .data(web::JsonConfig::default().limit(4096))
             .route("/{domain}", web::get().to_async(get_crawl_data))
-
     })
-        .bind(format!("127.0.0.1:8080"))
-        .unwrap()
-        .run()
-        .unwrap();
+    .bind(format!("127.0.0.1:8080"))
+    .unwrap()
+    .run()
+    .unwrap();
 }

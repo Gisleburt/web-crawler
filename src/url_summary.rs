@@ -1,6 +1,6 @@
+use serde::Serialize;
 use std::collections::hash_map::IntoIter;
 use std::collections::HashMap;
-use serde::Serialize;
 
 /// Our Urls are stored in a newtype structure to provide a simple API around a HashMap
 #[derive(Debug, Serialize)]

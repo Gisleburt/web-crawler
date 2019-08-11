@@ -31,34 +31,31 @@ where
     T: AsRef<str>,
 {
     // Download the html document
-    let result = get(url.clone())
-        .and_then(|mut response| response.text());
+    let result = get(url.clone()).and_then(|mut response| response.text());
     if let Err(e) = result {
         dbg!(e);
         return;
     }
-    if let Ok(body) = result {
 
-        // Parse the document with scraper
-        let html = Html::parse_document(&body);
+    // Parse the document with scraper
+    let html = Html::parse_document(&result.unwrap());
 
-        // Get all the anchor tags
-        let anchor = Selector::parse("a").unwrap(); // Should be safe, we know a is ok
+    // Get all the anchor tags
+    let anchor = Selector::parse("a").unwrap(); // Should be safe, we know a is ok
 
-        html.select(&anchor)
-            .into_iter()
-            .filter_map(|a| a.value().attr("href"))
-            .filter_map(|href| url.join(href).ok()) // Parse with join in case its a relative url
-            .for_each(|next_url| {
-                // Have we come across the url before, if we have we should crawl it
-                let new = summary.contains(&next_url);
-                // Lets add the url to make sure we don't create a loop
-                summary.add(&next_url);
-                if new && is_url_on_host(&next_url, host.as_ref()) {
-                     crawl_page(host.as_ref(), next_url, summary);
-                }
-            });
-    }
+    html.select(&anchor)
+        .into_iter()
+        .filter_map(|a| a.value().attr("href"))
+        .filter_map(|href| url.join(href).ok()) // Parse with join in case its a relative url
+        .for_each(|next_url| {
+            // Have we come across the url before, if we have we should crawl it
+            let new = summary.contains(&next_url);
+            // Lets add the url to make sure we don't create a loop
+            summary.add(&next_url);
+            if new && is_url_on_host(&next_url, host.as_ref()) {
+                crawl_page(host.as_ref(), next_url, summary);
+            }
+        });
 }
 
 #[cfg(test)]
