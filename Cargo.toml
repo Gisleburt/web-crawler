@@ -8,9 +8,18 @@ edition = "2018"
 
 [dependencies]
 actix-web = "1.0.5"
+dotenv = "0.14.1"
 futures = "0.1.28"
 percent-encoding = "2.1.0"
 reqwest = "0.9.19"
 scraper = "0.10.1"
 serde = "1.0.98"
 structopt = "0.2.18"
+# Add openssl-sys as a direct dependency so it can be cross compiled to
+# x86_64-unknown-linux-musl using the "vendored" feature below
+openssl-sys = "0.9.48"
+
+[features]
+# Force openssl-sys to staticly link in the openssl library. Necessary when
+# cross compiling to x86_64-unknown-linux-musl.
+vendored = ["openssl-sys/vendored"]
